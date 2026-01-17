@@ -1,0 +1,8 @@
+{
+  "name": "Shiksha Sahayak",
+  "description": "An AI-powered teaching assistant for rural educators, featuring real-time coaching, image editing tools, and micro-learning resources.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
