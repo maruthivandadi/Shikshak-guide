@@ -1,3 +1,4 @@
+
 import { LearningResource, UserProfile } from './types';
 
 export const APP_NAME = "Shiksha Sahayak";
@@ -17,30 +18,33 @@ export const LANGUAGES = [
 export const MOCK_RESOURCES: LearningResource[] = [
   {
     id: '1',
-    title: 'Managing Large Classes effectively',
+    title: '5 Fun Classroom Management Games',
     type: 'video',
-    duration: '3 min',
-    category: 'Classroom Management',
-    thumbnail: 'https://picsum.photos/300/200?random=1',
-    difficulty: 'Beginner'
+    duration: '8 min',
+    category: 'Management',
+    thumbnail: 'https://img.youtube.com/vi/2iOLK5xOaYM/mqdefault.jpg',
+    difficulty: 'Beginner',
+    link: 'https://www.youtube.com/watch?v=2iOLK5xOaYM'
   },
   {
     id: '2',
-    title: 'Fun Fraction Activities',
-    type: 'pdf',
-    duration: '5 min',
+    title: 'Fractions for Kids (Animated)',
+    type: 'video',
+    duration: '6 min',
     category: 'Pedagogy',
-    thumbnail: 'https://picsum.photos/300/200?random=2',
-    difficulty: 'Intermediate'
+    thumbnail: 'https://img.youtube.com/vi/n0FZhQ_GkKw/mqdefault.jpg',
+    difficulty: 'Beginner',
+    link: 'https://www.youtube.com/watch?v=n0FZhQ_GkKw'
   },
   {
     id: '3',
-    title: 'Calm Down Corner Setup',
-    type: 'article',
-    duration: '2 min',
-    category: 'Environment',
-    thumbnail: 'https://picsum.photos/300/200?random=3',
-    difficulty: 'Beginner'
+    title: '10 Everyday Classroom Hacks',
+    type: 'video',
+    duration: '10 min',
+    category: 'Strategies',
+    thumbnail: 'https://img.youtube.com/vi/W3fr4tm_FRo/mqdefault.jpg',
+    difficulty: 'Intermediate',
+    link: 'https://www.youtube.com/watch?v=W3fr4tm_FRo'
   }
 ];
 

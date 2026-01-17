@@ -1,3 +1,4 @@
+
 export interface UserProfile {
   name: string;
   grade: string;
@@ -14,6 +15,7 @@ export interface LearningResource {
   category: string;
   thumbnail: string;
   difficulty: 'Beginner' | 'Intermediate';
+  link?: string;
 }
 
 export interface ChatMessage {
