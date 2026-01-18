@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Mic, Send, X, Image as ImageIcon, Loader2, Sparkles, Wand2, MicOff, AlertCircle } from 'lucide-react';
-import { generateTextResponse, editImageWithGemini } from '../services/geminiService';
+import { Mic, Send, X, Image as ImageIcon, Loader2, Sparkles, Wand2, MicOff, AlertCircle, Eye } from 'lucide-react';
+import { generateTextResponse, editImageWithGemini, generateClassroomImage } from '../services/geminiService';
 import { ChatMessage, UserProfile } from '../types';
 
 interface QuerySystemProps {
@@ -172,6 +172,30 @@ export const QuerySystem: React.FC<QuerySystemProps> = ({ onClose, user }) => {
     }
   };
 
+  const handleVisualize = async (messageId: string, text: string) => {
+    // 1. Set loading state for this specific message
+    setMessages(prev => prev.map(msg => 
+        msg.id === messageId ? { ...msg, isGeneratingImage: true } : msg
+    ));
+
+    // 2. Call API with "English" explicitly
+    const imageBase64 = await generateClassroomImage(text, "English");
+
+    // 3. Update message with image or error, remove loading
+    setMessages(prev => prev.map(msg => 
+        msg.id === messageId ? { 
+            ...msg, 
+            isGeneratingImage: false, 
+            image: imageBase64 ? `data:image/jpeg;base64,${imageBase64}` : undefined 
+        } : msg
+    ));
+    
+    if (!imageBase64) {
+        setSpeechError("Could not generate image. Try again.");
+        setTimeout(() => setSpeechError(null), 3000);
+    }
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -212,14 +236,42 @@ export const QuerySystem: React.FC<QuerySystemProps> = ({ onClose, user }) => {
         {mode === 'CHAT' ? (
           <div className="space-y-4 pb-20">
             {messages.map((msg) => (
-              <div key={msg.id} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[85%] p-4 rounded-2xl ${
+              <div key={msg.id} className={`flex flex-col ${msg.role === 'user' ? 'items-end' : 'items-start'}`}>
+                <div className={`max-w-[85%] p-4 rounded-2xl relative ${
                   msg.role === 'user' 
                     ? 'bg-primary text-white rounded-br-none' 
                     : 'bg-white border border-gray-200 text-dark rounded-bl-none shadow-sm'
                 }`}>
                   <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                  
+                  {/* Generated Image */}
+                  {msg.image && (
+                      <div className="mt-3 rounded-xl overflow-hidden border-2 border-secondary shadow-sm">
+                          <img src={msg.image} alt="Visual Aid" className="w-full h-auto" />
+                      </div>
+                  )}
+
+                  {/* Loading Spinner for Image */}
+                  {msg.isGeneratingImage && (
+                      <div className="mt-3 flex items-center gap-2 text-xs font-medium text-secondary bg-secondary/10 p-3 rounded-xl animate-pulse">
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          Creating visual aid...
+                      </div>
+                  )}
+
                 </div>
+                
+                {/* Visualize Button (Only for Model, only if no image yet, and not loading) */}
+                {msg.role === 'model' && !msg.image && !msg.isGeneratingImage && (
+                    <button 
+                        onClick={() => handleVisualize(msg.id, msg.text || "")}
+                        className="mt-2 group relative overflow-hidden bg-gradient-to-r from-secondary to-teal-600 text-white px-5 py-2.5 rounded-xl shadow-lg shadow-secondary/20 hover:shadow-secondary/40 transition-all duration-300 flex items-center gap-2 text-xs font-bold active:scale-95 ml-1"
+                    >
+                        <Sparkles className="w-4 h-4 text-accent animate-pulse" />
+                        <span className="relative z-10">Visualize Concept</span>
+                        <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
+                    </button>
+                )}
               </div>
             ))}
             {isProcessing && (

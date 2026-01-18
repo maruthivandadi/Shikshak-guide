@@ -126,6 +126,11 @@ const ProfileView: React.FC<{ user: UserProfile; onUpdate: (u: UserProfile) => v
   const [formData, setFormData] = useState(user);
   const [isEditing, setIsEditing] = useState(false);
 
+  // Calculate profile completion
+  const fields = [formData.name, formData.grade, formData.subject, formData.school, formData.language];
+  const filledFields = fields.filter(f => f && f.trim().length > 0 && f !== "Not Set").length;
+  const progress = Math.round((filledFields / fields.length) * 100);
+
   const handleSave = () => {
     onUpdate(formData);
     setIsEditing(false);
@@ -146,6 +151,25 @@ const ProfileView: React.FC<{ user: UserProfile; onUpdate: (u: UserProfile) => v
         </button>
       </header>
 
+      {/* Profile Completion Bar */}
+      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+         <div className="flex justify-between items-center mb-2">
+            <span className="text-sm font-bold text-dark">Profile Strength</span>
+            <span className={`text-sm font-bold ${progress === 100 ? 'text-green-600' : 'text-primary'}`}>{progress}%</span>
+         </div>
+         <div className="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+            <div 
+                className={`h-2.5 rounded-full transition-all duration-1000 ${progress === 100 ? 'bg-green-500' : 'bg-primary'}`} 
+                style={{ width: `${progress}%` }}
+            ></div>
+         </div>
+         <p className="text-xs text-gray-500 mt-2">
+            {progress === 100 
+                ? "Excellent! Your AI coach is fully personalized." 
+                : "Complete your profile for better, more accurate AI recommendations."}
+         </p>
+      </div>
+
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col items-center text-center">
          <div className="w-20 h-20 bg-primary/20 rounded-full flex items-center justify-center text-primary text-3xl font-bold mb-4">
             {formData.name.charAt(0)}
@@ -159,7 +183,15 @@ const ProfileView: React.FC<{ user: UserProfile; onUpdate: (u: UserProfile) => v
          ) : (
             <h3 className="text-xl font-bold text-dark">{user.name}</h3>
          )}
-         <p className="text-gray-500 text-sm">{user.school}</p>
+         {isEditing ? (
+            <input 
+                className="text-center text-sm text-gray-500 border-b border-gray-300 mt-2"
+                value={formData.school}
+                onChange={(e) => setFormData({...formData, school: e.target.value})}
+            />
+         ) : (
+            <p className="text-gray-500 text-sm">{user.school}</p>
+         )}
       </div>
 
       <div className="space-y-4">

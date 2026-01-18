@@ -1,5 +1,5 @@
 {
-  "name": "Shiksha Sahayak",
+  "name": "Shikshak Guide",
   "description": "An AI-powered teaching assistant for rural educators, featuring real-time coaching, image editing tools, and micro-learning resources.",
   "requestFramePermissions": [
     "camera",

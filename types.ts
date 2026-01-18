@@ -24,6 +24,7 @@ export interface ChatMessage {
   text?: string;
   image?: string; // Base64 string
   isTyping?: boolean;
+  isGeneratingImage?: boolean; // New flag for loading state
 }
 
 export enum AppView {
