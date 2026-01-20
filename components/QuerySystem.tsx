@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Mic, Send, X, Image as ImageIcon, Loader2, Sparkles, Wand2, MicOff, AlertCircle, Eye } from 'lucide-react';
 import { generateTextResponse, editImageWithGemini, generateClassroomImage } from '../services/geminiService';
@@ -6,11 +7,12 @@ import { ChatMessage, UserProfile } from '../types';
 interface QuerySystemProps {
   onClose: () => void;
   user: UserProfile;
+  onActivity: () => void;
 }
 
 type Mode = 'CHAT' | 'IMAGE_EDIT';
 
-export const QuerySystem: React.FC<QuerySystemProps> = ({ onClose, user }) => {
+export const QuerySystem: React.FC<QuerySystemProps> = ({ onClose, user, onActivity }) => {
   const [mode, setMode] = useState<Mode>('CHAT');
   const [input, setInput] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -19,7 +21,7 @@ export const QuerySystem: React.FC<QuerySystemProps> = ({ onClose, user }) => {
   
   // Chat State
   const [messages, setMessages] = useState<ChatMessage[]>([
-    { id: '1', role: 'model', text: `Namaste ${user.name}! How can I help you in your classroom today?` }
+    { id: '1', role: 'model', text: `Namaste ${user.name}! How can I help you with your ${user.subject || 'class'} today?` }
   ]);
 
   // Image Edit State
@@ -134,6 +136,9 @@ export const QuerySystem: React.FC<QuerySystemProps> = ({ onClose, user }) => {
 
   const handleSend = async () => {
     if (!input.trim() && !selectedImage) return;
+    
+    // Track stat
+    onActivity();
 
     if (mode === 'CHAT') {
       const userMsg: ChatMessage = { id: Date.now().toString(), role: 'user', text: input };

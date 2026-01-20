@@ -1,3 +1,4 @@
+
 import { GoogleGenAI } from "@google/genai";
 import { UserProfile, ChatMessage } from "../types";
 
@@ -22,24 +23,29 @@ export const generateTextResponse = async (prompt: string, user: UserProfile, hi
 
     // 3️⃣ Context Injection Prompt (Dynamic)
     const contextInjection = `
-Teacher Context (Use this as background, but prioritize the specific user query if it differs):
-- Name: ${user.name}
-- Grade: ${user.grade}
-- Subject: ${user.subject}
-- School: ${user.school}
+Teacher Context (CRITICAL: Adhere to this strict context for all answers):
+- Name: ${user.name || "Teacher"}
+- Grade: ${user.grade ? user.grade : "Primary Level (General)"}
+- Subject: ${user.subject ? user.subject : "All Subjects"}
+- School: ${user.school || "Rural Government School"}
 - Classroom Type: Multi-level learners (Rural Government School)
 - Class Size: ~40 students
 - Resources Available: Chalk, board, stones, notebooks, local environment
-- Language Preference: ${user.language} (Respond in English but use simple terms)
+- Language Preference: ${user.language || "English"} (Respond in English but use simple terms)
     `;
 
     const fullPrompt = `
 System Prompt (Base Prompt – Fixed)
 
-This is the always-on instruction for the AI.
-
-You are an expert classroom coach for Indian government school teachers.
+You are an expert classroom coach for Indian government school teachers (Shiksha Sahayak).
 You understand multi-grade classrooms, large class sizes, low resources, and curriculum pressure.
+
+STRICT CONTEXT RULES:
+1. ALWAYS tailor the answer to the specific Grade and Subject mentioned in the 'Teacher Context'.
+   - If the teacher is Grade 1 Math, do NOT give examples from Grade 5 Science.
+2. If the user asks for a lesson plan, use the specific subject context provided.
+3. Be accurate. Do not provide incorrect facts. If you are unsure, suggest a simpler alternative activity that is safe and effective.
+
 Your goal is to give immediate, practical, and simple advice that a teacher can apply in the same day.
 Avoid theory. Avoid jargon. Avoid long explanations.
 Use everyday classroom objects and simple language.
@@ -55,7 +61,7 @@ ${prompt}
 
 Response Instructions:
 - If the teacher is asking a NEW question about teaching, a lesson plan, or a classroom problem, use this structured format:
-  1. One calming, supportive sentence.
+  1. One calming, supportive sentence (mentioning the specific subject/grade if relevant).
   2. Immediate Classroom Action (2–3 steps, max 5 minutes).
   3. Simple Explanation/Hook for the concept using local objects.
   4. Engagement Task for fast learners.
@@ -157,7 +163,7 @@ export const generateClassroomImage = async (contextText: string, language: stri
       // STEP 1: PROMPT REFINEMENT (The "Essence" Step)
       // We ask the text model to act as an Art Director.
       const refinementPrompt = `
-        You are an Art Director for educational illustrations.
+        You are an Art Director for educational illustrations for Indian schools.
         
         INPUT TEXT (Advice given to a teacher): 
         "${contextText.substring(0, 1500)}"
@@ -167,14 +173,14 @@ export const generateClassroomImage = async (contextText: string, language: stri
         Write a prompt to generate a CLEAR, SINGLE-SUBJECT illustration of that specific action/object.
         
         STRICT RULES:
-        1. Ignore abstract concepts (e.g. "patience"). Visualize the NOUNS and VERBS (e.g., "Counting stones", "Drawing a circle on blackboard", "Student holding a leaf").
-        2. IF NO PHYSICAL OBJECT IS MENTIONED: Visualize a teacher pointing to a blackboard with a smile.
+        1. Ignore abstract concepts (e.g. "patience", "kindness"). Visualize the NOUNS and VERBS (e.g., "Counting stones", "Drawing a circle on blackboard", "Student holding a leaf").
+        2. IF NO PHYSICAL OBJECT IS MENTIONED: Visualize a clean blackboard with 'Welcome' written on it.
         3. Setting: Rural Indian government school classroom.
-        4. Style: Simple, flat, colorful vector art on a WHITE background.
-        5. Text: NO TEXT. If specific text/numbers are needed, they MUST be in English.
+        4. Style: Simple, flat, colorful vector art on a WHITE background. High contrast.
+        5. Text: NO TEXT. If specific text/numbers are needed for the concept, they MUST be in English.
 
         OUTPUT TEMPLATE:
-        "A flat vector illustration of [Specific Subject/Action] in a rural Indian classroom. [Specific details like 'chalkboard', 'stones', 'notebook']. White background."
+        "A flat vector illustration of [Specific Subject/Action] in a rural Indian classroom. [Specific details like 'chalkboard', 'stones', 'notebook']. White background, bright colors."
       `;
 
       console.log("Refining image prompt...");

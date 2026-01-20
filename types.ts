@@ -7,6 +7,19 @@ export interface UserProfile {
   language: string;
 }
 
+export interface DailyActivity {
+  date: string;
+  count: number;
+}
+
+export interface UserStats {
+  totalQueries: number;
+  resourcesViewed: number;
+  currentStreak: number;
+  lastActiveDate: string;
+  weeklyActivity: DailyActivity[];
+}
+
 export interface LearningResource {
   id: string;
   title: string;
