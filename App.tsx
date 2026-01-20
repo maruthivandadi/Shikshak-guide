@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Home, BookOpen, BarChart2, User, Mic, X, Check, Clock, Users, Save, Edit3, ChevronRight, AlertTriangle, Sparkles } from 'lucide-react';
+import { Home, BookOpen, BarChart2, User, Mic, X, Check, Clock, Users, Save, Edit3, ChevronRight, AlertTriangle, Sparkles, ThumbsUp } from 'lucide-react';
 import { AppView, UserProfile, UserStats, DailyActivity } from './types';
 import { DEFAULT_USER, DEFAULT_STATS, MOTIVATIONAL_QUOTES, SUBJECT_PLANS, SCHOOL_OPTIONS } from './constants';
 import { Dashboard } from './components/Dashboard';
@@ -32,17 +32,31 @@ const HomeView: React.FC<{
   const quote = MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)];
   const [isPlanOpen, setIsPlanOpen] = useState(false);
   
+  // State to track if user wants extra tasks and completion flow
+  const [planOffset, setPlanOffset] = useState(0);
+  const [showCompletion, setShowCompletion] = useState(false);
+  
   const displayName = user.name ? user.name.split(' ')[0] : "Teacher";
   const isProfileComplete = user.grade && user.subject;
   
-  // Logic to rotate plans daily: Use day of year to pick an index
+  // Logic to rotate plans daily: Use day of year + offset to pick an index
   const dayOfYear = Math.floor((new Date().getTime() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 1000 / 60 / 60 / 24);
   
   const availablePlans = (isProfileComplete && SUBJECT_PLANS[user.subject]) 
       ? SUBJECT_PLANS[user.subject] 
       : SUBJECT_PLANS["default"];
       
-  const plan = availablePlans[dayOfYear % availablePlans.length];
+  const plan = availablePlans[(dayOfYear + planOffset) % availablePlans.length];
+
+  const handleCloseModal = () => {
+      setIsPlanOpen(false);
+      setShowCompletion(false);
+  };
+
+  const handleNextTask = () => {
+      setPlanOffset(prev => prev + 1);
+      setShowCompletion(false);
+  };
 
   return (
     <div className="p-4 space-y-6 pb-24">
@@ -96,55 +110,84 @@ const HomeView: React.FC<{
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
            <div className="bg-white rounded-2xl w-full max-w-sm max-h-[90vh] overflow-y-auto shadow-2xl animate-in zoom-in-95 duration-200">
               <div className="p-5">
-                <div className="flex justify-between items-start mb-4">
-                   <div>
-                     <h3 className="text-xl font-bold text-dark">{plan.title}</h3>
-                     <p className="text-sm text-gray-500">{user.grade} • {user.subject}</p>
-                   </div>
-                   <button onClick={() => setIsPlanOpen(false)} className="p-1 bg-gray-100 rounded-full hover:bg-gray-200">
-                     <X className="w-5 h-5 text-gray-600" />
-                   </button>
-                </div>
-                
-                <div className="flex gap-4 mb-6">
-                   <div className="flex items-center gap-1 text-xs font-medium text-gray-600 bg-gray-100 px-3 py-1.5 rounded-lg">
-                      <Clock className="w-3 h-3" /> {plan.duration}
-                   </div>
-                   <div className="flex items-center gap-1 text-xs font-medium text-gray-600 bg-gray-100 px-3 py-1.5 rounded-lg">
-                      <Users className="w-3 h-3" /> {plan.groupSize}
-                   </div>
-                </div>
+                {!showCompletion ? (
+                    <>
+                        <div className="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 className="text-xl font-bold text-dark">{plan.title}</h3>
+                            <p className="text-sm text-gray-500">{user.grade} • {user.subject}</p>
+                        </div>
+                        <button onClick={handleCloseModal} className="p-1 bg-gray-100 rounded-full hover:bg-gray-200">
+                            <X className="w-5 h-5 text-gray-600" />
+                        </button>
+                        </div>
+                        
+                        <div className="flex gap-4 mb-6">
+                        <div className="flex items-center gap-1 text-xs font-medium text-gray-600 bg-gray-100 px-3 py-1.5 rounded-lg">
+                            <Clock className="w-3 h-3" /> {plan.duration}
+                        </div>
+                        <div className="flex items-center gap-1 text-xs font-medium text-gray-600 bg-gray-100 px-3 py-1.5 rounded-lg">
+                            <Users className="w-3 h-3" /> {plan.groupSize}
+                        </div>
+                        </div>
 
-                <div className="space-y-4">
-                   <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
-                      <h4 className="font-bold text-blue-800 text-sm mb-1">Preparation</h4>
-                      <p className="text-sm text-blue-700">{plan.prep}</p>
-                   </div>
+                        <div className="space-y-4">
+                        <div className="bg-blue-50 p-4 rounded-xl border border-blue-100">
+                            <h4 className="font-bold text-blue-800 text-sm mb-1">Preparation</h4>
+                            <p className="text-sm text-blue-700">{plan.prep}</p>
+                        </div>
 
-                   <div>
-                      <h4 className="font-bold text-dark text-sm mb-2">Steps:</h4>
-                      <ol className="list-decimal pl-4 space-y-3 text-sm text-gray-700">
-                         {plan.steps.map((step: string, idx: number) => (
-                             <li key={idx}>{step}</li>
-                         ))}
-                      </ol>
-                   </div>
-                </div>
+                        <div>
+                            <h4 className="font-bold text-dark text-sm mb-2">Steps:</h4>
+                            <ol className="list-decimal pl-4 space-y-3 text-sm text-gray-700">
+                                {plan.steps.map((step: string, idx: number) => (
+                                    <li key={idx}>{step}</li>
+                                ))}
+                            </ol>
+                        </div>
+                        </div>
 
-                <div className="flex gap-3 mt-6">
-                    <button 
-                        onClick={() => setIsPlanOpen(false)} 
-                        className="flex-1 bg-white border border-gray-200 text-gray-700 font-bold py-3 rounded-xl shadow-sm active:scale-95 transition-transform"
-                    >
-                        Close
-                    </button>
-                    <button 
-                        onClick={() => setIsPlanOpen(false)} 
-                        className="flex-1 bg-secondary text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-secondary/20 active:scale-95 transition-transform"
-                    >
-                        <Check className="w-5 h-5" /> Mark Done
-                    </button>
-                </div>
+                        <div className="flex gap-3 mt-6">
+                            <button 
+                                onClick={handleCloseModal} 
+                                className="flex-1 bg-white border border-gray-200 text-gray-700 font-bold py-3 rounded-xl shadow-sm active:scale-95 transition-transform"
+                            >
+                                Close
+                            </button>
+                            <button 
+                                onClick={() => setShowCompletion(true)} 
+                                className="flex-1 bg-secondary text-white font-bold py-3 rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-secondary/20 active:scale-95 transition-transform"
+                            >
+                                <Check className="w-5 h-5" /> Mark Done
+                            </button>
+                        </div>
+                    </>
+                ) : (
+                    <div className="flex flex-col items-center justify-center py-6 text-center animate-in fade-in slide-in-from-bottom-4 duration-300">
+                        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mb-4">
+                            <ThumbsUp className="w-10 h-10 text-green-600" />
+                        </div>
+                        <h3 className="text-xl font-bold text-dark mb-2">Great Job, {displayName}! 🎉</h3>
+                        <p className="text-sm text-gray-500 mb-8 max-w-[250px]">
+                            You've completed this activity. Would you like to see another task for today?
+                        </p>
+                        
+                        <div className="flex flex-col w-full gap-3">
+                            <button 
+                                onClick={handleNextTask}
+                                className="w-full bg-secondary text-white font-bold py-3.5 rounded-xl shadow-lg shadow-secondary/20 active:scale-95 transition-transform flex items-center justify-center gap-2"
+                            >
+                                <Sparkles className="w-5 h-5" /> Yes, Give me another
+                            </button>
+                            <button 
+                                onClick={handleCloseModal}
+                                className="w-full bg-gray-50 text-gray-600 font-bold py-3.5 rounded-xl active:scale-95 transition-transform"
+                            >
+                                No, I'm done for now
+                            </button>
+                        </div>
+                    </div>
+                )}
               </div>
            </div>
         </div>

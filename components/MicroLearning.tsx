@@ -10,31 +10,29 @@ interface MicroLearningProps {
 }
 
 export const MicroLearning: React.FC<MicroLearningProps> = ({ user, onActivity }) => {
-  const [filter, setFilter] = useState('All');
+  const categories = ['All', 'Pedagogy', 'Math', 'Science', 'English', 'Hindi', 'Social Studies', 'Management'];
+  
+  // Initial state logic: If user has a subject, use it as the default filter
+  const [filter, setFilter] = useState(() => {
+    if (user?.subject && categories.includes(user.subject)) {
+        return user.subject;
+    }
+    return 'All';
+  });
+  
   const [search, setSearch] = useState('');
 
-  // Default to user's subject if available on first load
+  // Update filter when user subject changes (e.g. after profile edit)
   useEffect(() => {
-    if (user?.subject && filter === 'All') {
-        // If subject exists in categories (loosely checked) or just default
-        // We actually want to show everything but maybe highlight subject content
-        // For now, let's keep 'All' but we can sort filtered list
+    if (user?.subject && categories.includes(user.subject)) {
+        setFilter(user.subject);
     }
-  }, [user]);
-
-  const categories = ['All', 'Pedagogy', 'Math', 'Science', 'English', 'Management'];
+  }, [user?.subject]);
 
   const filteredResources = MOCK_RESOURCES.filter(r => {
       const matchesCategory = filter === 'All' || r.category === filter;
       const matchesSearch = r.title.toLowerCase().includes(search.toLowerCase());
       return matchesCategory && matchesSearch;
-  }).sort((a, b) => {
-      // Prioritize user's subject in the list if Filter is All
-      if (filter === 'All' && user?.subject) {
-          if (a.category === user.subject && b.category !== user.subject) return -1;
-          if (a.category !== user.subject && b.category === user.subject) return 1;
-      }
-      return 0;
   });
 
   const handleResourceClick = (link?: string) => {
@@ -84,7 +82,10 @@ export const MicroLearning: React.FC<MicroLearningProps> = ({ user, onActivity }
       <div className="space-y-4">
         {filteredResources.length === 0 ? (
             <div className="text-center py-10 opacity-50">
-                <p>No resources found.</p>
+                <p>No resources found for {filter}.</p>
+                {filter !== 'All' && (
+                    <button onClick={() => setFilter('All')} className="text-secondary font-bold text-sm mt-2">View All Resources</button>
+                )}
             </div>
         ) : filteredResources.map((resource) => (
           <div 
@@ -109,7 +110,8 @@ export const MicroLearning: React.FC<MicroLearningProps> = ({ user, onActivity }
                       resource.category === 'Math' ? 'bg-blue-50 text-blue-600' :
                       resource.category === 'Pedagogy' ? 'bg-purple-50 text-purple-600' :
                       resource.category === 'Science' ? 'bg-green-50 text-green-600' :
-                      'bg-orange-50 text-orange-600'
+                      resource.category === 'Hindi' ? 'bg-orange-50 text-orange-600' :
+                      'bg-gray-50 text-gray-600'
                   }`}>
                       {resource.category}
                   </span>

@@ -256,6 +256,26 @@ export const MOCK_RESOURCES: LearningResource[] = [
     thumbnail: 'https://img.youtube.com/vi/eQuW8G2QV_Q/mqdefault.jpg',
     difficulty: 'Intermediate',
     link: 'https://www.youtube.com/watch?v=eQuW8G2QV_Q'
+  },
+  {
+    id: '6',
+    title: 'Hindi Varnamala Song with Action',
+    type: 'video',
+    duration: '4 min',
+    category: 'Hindi',
+    thumbnail: 'https://img.youtube.com/vi/Ff941-K7B3k/mqdefault.jpg',
+    difficulty: 'Beginner',
+    link: 'https://www.youtube.com/watch?v=Ff941-K7B3k'
+  },
+  {
+    id: '7',
+    title: 'Teaching Maps to Kids',
+    type: 'video',
+    duration: '7 min',
+    category: 'Social Studies',
+    thumbnail: 'https://img.youtube.com/vi/dp8VOG8Cgag/mqdefault.jpg',
+    difficulty: 'Intermediate',
+    link: 'https://www.youtube.com/watch?v=dp8VOG8Cgag'
   }
 ];
 
