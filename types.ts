@@ -41,6 +41,8 @@ export interface ChatMessage {
 }
 
 export enum AppView {
+  SPLASH = 'SPLASH',
+  AUTH = 'AUTH',
   HOME = 'HOME',
   LEARN = 'LEARN',
   DASHBOARD = 'DASHBOARD',

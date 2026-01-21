@@ -1,25 +1,45 @@
 
 import React, { useState, useEffect } from 'react';
-import { Home, BookOpen, BarChart2, User, Mic, X, Check, Clock, Users, Save, Edit3, ChevronRight, AlertTriangle, Sparkles, ThumbsUp } from 'lucide-react';
-import { AppView, UserProfile, UserStats, DailyActivity } from './types';
+import { Home, BookOpen, BarChart2, User, Mic, X, Check, Clock, Users, Save, ChevronRight, AlertTriangle, Sparkles, ThumbsUp, LogOut } from 'lucide-react';
+import { AppView, UserProfile, UserStats } from './types';
 import { DEFAULT_USER, DEFAULT_STATS, MOTIVATIONAL_QUOTES, SUBJECT_PLANS, SCHOOL_OPTIONS } from './constants';
 import { Dashboard } from './components/Dashboard';
 import { MicroLearning } from './components/MicroLearning';
 import { QuerySystem } from './components/QuerySystem';
+import { Auth } from './components/Auth';
+import { Splash } from './components/Splash';
 
-// --- Helper for Storage ---
-const loadData = () => {
-    const savedUser = localStorage.getItem('shiksha_user');
-    const savedStats = localStorage.getItem('shiksha_stats');
-    return {
-        user: savedUser ? JSON.parse(savedUser) : DEFAULT_USER,
-        stats: savedStats ? JSON.parse(savedStats) : DEFAULT_STATS
-    };
+// --- Helper for Storage (Simulated Database) ---
+// Structure: { [email]: { password: '...', user: {...}, stats: {...} } }
+const DB_KEY = 'shiksha_users_db';
+
+const getDB = () => {
+  try {
+    const data = localStorage.getItem(DB_KEY);
+    return data ? JSON.parse(data) : {};
+  } catch { return {}; }
 };
 
-const saveData = (user: UserProfile, stats: UserStats) => {
-    localStorage.setItem('shiksha_user', JSON.stringify(user));
-    localStorage.setItem('shiksha_stats', JSON.stringify(stats));
+const saveDB = (db: any) => localStorage.setItem(DB_KEY, JSON.stringify(db));
+
+// Helper to load active session synchronously to prevent flicker
+const loadSession = () => {
+  try {
+    const savedEmail = localStorage.getItem('shiksha_last_email');
+    if (savedEmail) {
+      const db = getDB();
+      if (db[savedEmail]) {
+        return {
+          email: savedEmail,
+          user: db[savedEmail].user,
+          stats: db[savedEmail].stats
+        };
+      }
+    }
+  } catch (e) {
+    console.error("Session load error", e);
+  }
+  return null;
 };
 
 // --- Home View ---
@@ -63,7 +83,7 @@ const HomeView: React.FC<{
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-           <p className="text-gray-500 text-xs font-bold uppercase tracking-widest">Shiksha Sahayak</p>
+           <p className="text-gray-500 text-xs font-bold uppercase tracking-widest">Shikshak Guide</p>
            <h1 className="text-2xl font-bold text-dark mt-1">Namaste, {displayName} <span className="text-2xl">🙏</span></h1>
         </div>
         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-orange-400 flex items-center justify-center text-white font-bold shadow-md border-2 border-white">
@@ -228,7 +248,8 @@ const ProfileView: React.FC<{
     user: UserProfile; 
     onUpdate: (u: UserProfile) => void;
     onNavigate: (view: AppView) => void; 
-}> = ({ user, onUpdate, onNavigate }) => {
+    onLogout: () => void;
+}> = ({ user, onUpdate, onNavigate, onLogout }) => {
   const [formData, setFormData] = useState(user);
   const [saved, setSaved] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
@@ -270,6 +291,12 @@ const ProfileView: React.FC<{
           <h2 className="text-2xl font-bold text-dark">My Profile</h2>
           <p className="text-gray-500 text-sm">Customize your AI Coach</p>
         </div>
+        <button 
+            onClick={onLogout}
+            className="text-red-500 bg-red-50 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1 hover:bg-red-100"
+        >
+            <LogOut className="w-3 h-3" /> Log Out
+        </button>
       </header>
 
       {/* Profile Completion Card */}
@@ -401,22 +428,79 @@ const ProfileView: React.FC<{
 // --- Main App Component ---
 
 const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<AppView>(AppView.HOME);
+  // Initialize state synchronously from localStorage to prevent flicker
+  const session = loadSession();
+
+  const [currentView, setCurrentView] = useState<AppView>(() => {
+    // If we have a session, go straight to home, otherwise Splash
+    return session ? AppView.HOME : AppView.SPLASH;
+  });
+
   const [isQueryOpen, setIsQueryOpen] = useState(false);
-  const [user, setUser] = useState<UserProfile>(DEFAULT_USER);
-  const [stats, setStats] = useState<UserStats>(DEFAULT_STATS);
+  const [user, setUser] = useState<UserProfile>(session?.user || DEFAULT_USER);
+  const [stats, setStats] = useState<UserStats>(session?.stats || DEFAULT_STATS);
+  const [currentEmail, setCurrentEmail] = useState<string | null>(session?.email || null);
 
-  // Initialize Data from Storage
-  useEffect(() => {
-    const { user, stats } = loadData();
-    setUser(user);
-    setStats(stats);
-  }, []);
+  const handleLogin = async (email: string, pass: string) => {
+    // Simulate network delay
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    const db = getDB();
+    const userData = db[email];
 
-  // Update logic to save to storage
+    if (!userData) throw new Error("Account not found. Please sign up.");
+    if (userData.password !== pass) throw new Error("Incorrect password.");
+
+    // Success
+    setCurrentEmail(email);
+    setUser(userData.user);
+    setStats(userData.stats);
+    setCurrentView(AppView.HOME);
+    localStorage.setItem('shiksha_last_email', email);
+  };
+
+  const handleSignup = async (email: string, pass: string, name: string) => {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    const db = getDB();
+    
+    if (db[email]) throw new Error("Account already exists. Please log in.");
+
+    const newUser = { ...DEFAULT_USER, name };
+    const newStats = DEFAULT_STATS;
+
+    db[email] = {
+      password: pass,
+      user: newUser,
+      stats: newStats
+    };
+
+    saveDB(db);
+
+    // Auto login
+    setCurrentEmail(email);
+    setUser(newUser);
+    setStats(newStats);
+    setCurrentView(AppView.HOME);
+    localStorage.setItem('shiksha_last_email', email);
+  };
+
+  const handleLogout = () => {
+    setCurrentEmail(null);
+    localStorage.removeItem('shiksha_last_email');
+    setCurrentView(AppView.SPLASH);
+    setUser(DEFAULT_USER);
+    setStats(DEFAULT_STATS);
+  };
+
   const updateUser = (newUser: UserProfile) => {
       setUser(newUser);
-      saveData(newUser, stats);
+      if (currentEmail) {
+        const db = getDB();
+        if (db[currentEmail]) {
+           db[currentEmail].user = newUser;
+           saveDB(db);
+        }
+      }
   };
 
   const updateStats = (action: 'query' | 'view_resource') => {
@@ -429,34 +513,46 @@ const App: React.FC = () => {
 
       // Update Streak
       if (newStats.lastActiveDate !== today) {
-         // Naive streak logic: if yesterday was active, inc, else reset (omitted complex date math for brevity)
-         // For now, just increment usage on new days
          newStats.lastActiveDate = today;
          newStats.currentStreak++;
       }
 
       // Update Weekly Activity
       const dayName = new Date().toLocaleDateString('en-US', { weekday: 'short' });
-      // Find today's entry in weekly activity or add it
       const existingDay = newStats.weeklyActivity.find(d => d.date === dayName);
       if (existingDay) {
           existingDay.count++;
       } else {
           newStats.weeklyActivity.push({ date: dayName, count: 1 });
-          // Keep only last 7 days
           if (newStats.weeklyActivity.length > 7) newStats.weeklyActivity.shift();
       }
 
       setStats(newStats);
-      saveData(user, newStats);
+      
+      if (currentEmail) {
+        const db = getDB();
+        if (db[currentEmail]) {
+           db[currentEmail].stats = newStats;
+           saveDB(db);
+        }
+      }
   };
+
+  if (currentView === AppView.SPLASH) {
+      return <Splash onComplete={() => setCurrentView(AppView.AUTH)} />;
+  }
+
+  // If not logged in and not in Splash, show Auth screen
+  if (currentView === AppView.AUTH) {
+    return <Auth onLogin={handleLogin} onSignup={handleSignup} />;
+  }
 
   return (
     <div className="max-w-md mx-auto min-h-screen bg-gray-50 relative shadow-2xl overflow-hidden font-sans">
       
       {/* Top Status Bar Simulator */}
       <div className="bg-white px-4 py-2 flex justify-between items-center text-[10px] font-bold text-gray-400 sticky top-0 z-20 border-b border-gray-50 backdrop-blur-sm bg-white/90">
-        <span>SHIKSHA SAHAYAK v1.3</span>
+        <span>SHIKSHAK GUIDE v2.0</span>
         <div className="flex gap-2 items-center">
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
             <span>ONLINE</span>
@@ -479,7 +575,7 @@ const App: React.FC = () => {
             <Dashboard stats={stats} />
         )}
         {currentView === AppView.PROFILE && (
-           <ProfileView user={user} onUpdate={updateUser} onNavigate={setCurrentView} />
+           <ProfileView user={user} onUpdate={updateUser} onNavigate={setCurrentView} onLogout={handleLogout} />
         )}
       </main>
 

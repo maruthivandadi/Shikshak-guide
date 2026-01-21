@@ -1,7 +1,7 @@
 
 import { LearningResource, UserProfile, UserStats } from './types';
 
-export const APP_NAME = "Shiksha Sahayak";
+export const APP_NAME = "Shikshak Guide";
 
 // Initial state is "Guest" to encourage profile completion
 export const DEFAULT_USER: UserProfile = {
@@ -73,6 +73,18 @@ export const SUBJECT_PLANS: Record<string, any[]> = {
       ],
       duration: "25 Mins",
       groupSize: "Pairs"
+    },
+    {
+      title: "Mental Math Cricket",
+      prep: "Chalkboard scorecard.",
+      steps: [
+        "Divide class into two teams.",
+        "Bowler asks a multiplication question.",
+        "Batsman answers quickly to score runs.",
+        "Wrong answer implies 'Wicket'."
+      ],
+      duration: "15 Mins",
+      groupSize: "Whole Class"
     }
   ],
   "Science": [
@@ -111,6 +123,18 @@ export const SUBJECT_PLANS: Record<string, any[]> = {
       ],
       duration: "15 Mins",
       groupSize: "Groups of 5"
+    },
+    {
+      title: "Seed Germination Log",
+      prep: "Cotton, beans, small cup.",
+      steps: [
+        "Wet cotton in a cup.",
+        "Place bean seeds.",
+        "Ask students to draw daily changes.",
+        "Discuss roots and shoots."
+      ],
+      duration: "10 Mins (Daily)",
+      groupSize: "Individual"
     }
   ],
   "English": [
@@ -136,6 +160,18 @@ export const SUBJECT_PLANS: Record<string, any[]> = {
         "Write the sentence on the board."
       ],
       duration: "20 Mins",
+      groupSize: "Whole Class"
+    },
+    {
+      title: "Picture Description",
+      prep: "A colorful picture from a magazine.",
+      steps: [
+        "Show the picture to the class.",
+        "Ask students to name 5 objects they see.",
+        "Ask them to describe colors and actions.",
+        "Write keywords on the board."
+      ],
+      duration: "15 Mins",
       groupSize: "Whole Class"
     }
   ],
@@ -163,6 +199,18 @@ export const SUBJECT_PLANS: Record<string, any[]> = {
       ],
       duration: "30 Mins",
       groupSize: "Individual"
+    },
+    {
+      title: "Diversity Day",
+      prep: "None.",
+      steps: [
+        "Ask students about food cooked at home today.",
+        "List different dishes on the board.",
+        "Discuss how different families eat different things.",
+        "Celebrate variety."
+      ],
+      duration: "20 Mins",
+      groupSize: "Whole Class"
     }
   ],
   "Hindi": [
@@ -202,6 +250,17 @@ export const SUBJECT_PLANS: Record<string, any[]> = {
       ],
       duration: "10 Mins",
       groupSize: "Pairs"
+    },
+    {
+      title: "Quick Write / Quick Draw",
+      prep: "Notebooks.",
+      steps: [
+        "Give a topic (e.g. My Favorite Animal).",
+        "Give 5 minutes to write or draw anything about it.",
+        "Ask 3 students to share.",
+      ],
+      duration: "15 Mins",
+      groupSize: "Individual"
     }
   ]
 };
@@ -209,7 +268,7 @@ export const SUBJECT_PLANS: Record<string, any[]> = {
 export const MOCK_RESOURCES: LearningResource[] = [
   {
     id: '1',
-    title: 'NIPUN Bharat: Understanding FLN',
+    title: 'NIPUN Bharat: Understanding FLN Goals',
     type: 'video',
     duration: '5 min',
     category: 'Pedagogy',
@@ -219,7 +278,7 @@ export const MOCK_RESOURCES: LearningResource[] = [
   },
   {
     id: '2',
-    title: 'Teaching Fractions concretely',
+    title: 'Teaching Fractions Concretely',
     type: 'video',
     duration: '8 min',
     category: 'Math',
@@ -229,7 +288,7 @@ export const MOCK_RESOURCES: LearningResource[] = [
   },
   {
     id: '3',
-    title: 'Classroom Management Strategies',
+    title: 'Classroom Management in Large Classes',
     type: 'video',
     duration: '10 min',
     category: 'Management',
@@ -239,7 +298,7 @@ export const MOCK_RESOURCES: LearningResource[] = [
   },
   {
     id: '4',
-    title: 'ESL Games for English Teachers',
+    title: 'TLM for English: No Cost Low Cost',
     type: 'video',
     duration: '6 min',
     category: 'English',
@@ -276,6 +335,26 @@ export const MOCK_RESOURCES: LearningResource[] = [
     thumbnail: 'https://img.youtube.com/vi/dp8VOG8Cgag/mqdefault.jpg',
     difficulty: 'Intermediate',
     link: 'https://www.youtube.com/watch?v=dp8VOG8Cgag'
+  },
+  {
+    id: '8',
+    title: 'Constructivism in Indian Classrooms',
+    type: 'article',
+    duration: '5 min',
+    category: 'Pedagogy',
+    thumbnail: 'https://img.youtube.com/vi/F00R3pA_tQ8/mqdefault.jpg',
+    difficulty: 'Intermediate',
+    link: 'https://www.youtube.com/watch?v=F00R3pA_tQ8'
+  },
+  {
+    id: '9',
+    title: 'Multiplication Tricks for Fast Math',
+    type: 'video',
+    duration: '6 min',
+    category: 'Math',
+    thumbnail: 'https://img.youtube.com/vi/v7k3zXvSgEc/mqdefault.jpg',
+    difficulty: 'Beginner',
+    link: 'https://www.youtube.com/watch?v=v7k3zXvSgEc'
   }
 ];
 
